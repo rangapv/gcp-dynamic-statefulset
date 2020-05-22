@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: web1-pod-statefulset
+spec:
+  selector:
+    matchLabels:
+      name: {{ .Values.statefulset.name }} # has to match .spec.template.metadata.labels
+  serviceName: "nginx"
+  replicas: {{ .Values.statefulset.replicas }} # by default is 1
+  template:
+    metadata:
+      labels:
+       name: {{ .Values.statefulset.name }} # has to match .spec.selector.matchLabels
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: nginx
+        image: {{ .Values.statefulset.image }} 
+        imagePullPolicy: {{ .Values.statefulset.imagePullPolicy }} 
+        ports:
+        - containerPort: {{ .Values.statefulset.containerPort }} 
+          name: {{ .Values.statefulset.portName }} 
+        volumeMounts:
+        - name: www-vol
+          mountPath: {{ .Values.statefulset.mountPath }} 
+  volumeClaimTemplates:
+  - metadata:
+      name: www-vol
+    spec:
+      accessModes: [ {{ .Values.statefulset.accessModes | quote }} ]
+      storageClassName: {{ .Values.statefulset.storageClassName | quote }} 
+      resources:
+        requests:
+          storage: {{ .Values.statefulset.storage }} 
